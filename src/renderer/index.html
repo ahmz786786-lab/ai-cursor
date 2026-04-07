@@ -6,33 +6,34 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="card">
-      <header class="drag">
-        <div class="title">
-          <span class="dot"></span> AI Cursor
-        </div>
-        <div class="header-controls no-drag">
-          <label class="listen-toggle" title="Always listen">
-            <input type="checkbox" id="alwaysListen" />
-            <span>Listen</span>
-          </label>
+    <!-- Tiny bubble that follows the cursor -->
+    <div id="bubble" class="bubble">
+      <span class="pulse"></span>
+      <span class="emoji">✨</span>
+    </div>
+
+    <!-- Expanded chat panel -->
+    <div id="panel" class="card hidden">
+      <header>
+        <div class="title"><span class="dot"></span> AI Cursor</div>
+        <div class="header-controls">
           <select id="provider">
             <option value="claude">Claude</option>
             <option value="gemini">Gemini</option>
           </select>
+          <button id="closeBtn" title="Collapse">✕</button>
         </div>
       </header>
 
       <div id="messages" class="messages"></div>
 
-      <div class="hint" id="hint">Tip: <kbd>⌘⇧Space</kbd> toggles window. Turn on <b>Listen</b> to go hands-free.</div>
-
-      <form id="form" class="input-row no-drag">
+      <form id="form" class="input-row">
         <button type="button" id="mic" title="Voice">🎤</button>
-        <input id="input" type="text" placeholder="I'm stuck — help me…" autocomplete="off" />
+        <input id="input" type="text" placeholder="Ask anything…" autocomplete="off" />
         <button type="submit" id="send">↑</button>
       </form>
     </div>
+
     <script src="renderer.js"></script>
   </body>
 </html>

@@ -1,9 +1,50 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { background: transparent; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; color: #eaeaea; height: 100%; }
+html, body {
+  background: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  color: #eaeaea;
+  height: 100%;
+  overflow: hidden;
+}
 
+.hidden { display: none !important; }
+
+/* --- Cursor-following bubble --- */
+.bubble {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #6366f1, #1e1b4b);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.45), 0 0 30px rgba(99,102,241,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.bubble.listening { box-shadow: 0 6px 24px rgba(0,0,0,0.45), 0 0 35px rgba(74,222,128,0.85); }
+.bubble.thinking  { box-shadow: 0 6px 24px rgba(0,0,0,0.45), 0 0 35px rgba(250,204,21,0.85); }
+.bubble .emoji { font-size: 26px; }
+.bubble .pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.35);
+  animation: pulse 2s ease-out infinite;
+}
+@keyframes pulse {
+  0%   { transform: scale(0.9); opacity: 0.9; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* --- Expanded chat panel --- */
 .card {
-  height: 100vh;
-  background: rgba(20, 20, 24, 0.82);
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 24, 0.85);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(255,255,255,0.08);
@@ -11,27 +52,19 @@ html, body { background: transparent; font-family: -apple-system, BlinkMacSystem
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
-
-header.drag {
-  -webkit-app-region: drag;
+header {
   padding: 10px 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.no-drag { -webkit-app-region: no-drag; }
-
 .title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px #4ade80; }
-
 .header-controls { display: flex; align-items: center; gap: 8px; }
-.listen-toggle { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #cbd5e1; cursor: pointer; user-select: none; }
-.listen-toggle input { accent-color: #4ade80; }
-
-select {
+select, .header-controls button {
   background: rgba(255,255,255,0.08);
   color: #eaeaea;
   border: 1px solid rgba(255,255,255,0.1);
@@ -39,52 +72,34 @@ select {
   font-size: 12px;
   padding: 4px 8px;
   outline: none;
+  cursor: pointer;
 }
-
 .messages {
-  flex: 1;
-  padding: 12px 14px;
-  overflow-y: auto;
-  font-size: 13px;
-  line-height: 1.45;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex: 1; padding: 12px 14px; overflow-y: auto;
+  font-size: 13px; line-height: 1.45;
+  display: flex; flex-direction: column; gap: 10px;
 }
-
 .msg { padding: 8px 12px; border-radius: 12px; max-width: 90%; white-space: pre-wrap; word-wrap: break-word; }
 .msg.user { align-self: flex-end; background: #2563eb; }
 .msg.assistant { align-self: flex-start; background: rgba(255,255,255,0.08); }
 .msg.error { align-self: stretch; background: rgba(220, 38, 38, 0.25); color: #fecaca; font-size: 12px; }
 
-.hint { padding: 0 14px 8px; font-size: 11px; color: rgba(255,255,255,0.45); }
-kbd { background: rgba(255,255,255,0.12); padding: 1px 5px; border-radius: 4px; font-size: 10px; }
-
 .input-row {
-  display: flex;
-  gap: 6px;
-  padding: 10px;
+  display: flex; gap: 6px; padding: 10px;
   border-top: 1px solid rgba(255,255,255,0.06);
 }
 .input-row input {
-  flex: 1;
-  background: rgba(255,255,255,0.06);
+  flex: 1; background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  color: #eaeaea;
-  padding: 8px 12px;
-  font-size: 13px;
-  outline: none;
+  border-radius: 10px; color: #eaeaea;
+  padding: 8px 12px; font-size: 13px; outline: none;
 }
 .input-row input:focus { border-color: #2563eb; }
 .input-row button {
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  color: #eaeaea;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 14px;
+  border-radius: 10px; color: #eaeaea;
+  padding: 8px 12px; cursor: pointer; font-size: 14px;
 }
 .input-row button#send { background: #2563eb; border-color: #2563eb; }
 .input-row button#mic.listening { background: #dc2626; border-color: #dc2626; }
