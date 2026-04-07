@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>AI Cursor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="card">
+      <header class="drag">
+        <div class="title">
+          <span class="dot"></span> AI Cursor
+        </div>
+        <select id="provider" class="no-drag">
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </select>
+      </header>
+
+      <div id="messages" class="messages"></div>
+
+      <div class="hint" id="hint">Tip: press <kbd>⌘⇧Space</kbd> to toggle. Click 🎤 to speak.</div>
+
+      <form id="form" class="input-row no-drag">
+        <button type="button" id="mic" title="Voice">🎤</button>
+        <input id="input" type="text" placeholder="I'm stuck — help me…" autocomplete="off" />
+        <button type="submit" id="send">↑</button>
+      </form>
+    </div>
+    <script src="renderer.js"></script>
+  </body>
+</html>
