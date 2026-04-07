@@ -11,15 +11,21 @@
         <div class="title">
           <span class="dot"></span> AI Cursor
         </div>
-        <select id="provider" class="no-drag">
-          <option value="claude">Claude</option>
-          <option value="gemini">Gemini</option>
-        </select>
+        <div class="header-controls no-drag">
+          <label class="listen-toggle" title="Always listen">
+            <input type="checkbox" id="alwaysListen" />
+            <span>Listen</span>
+          </label>
+          <select id="provider">
+            <option value="claude">Claude</option>
+            <option value="gemini">Gemini</option>
+          </select>
+        </div>
       </header>
 
       <div id="messages" class="messages"></div>
 
-      <div class="hint" id="hint">Tip: press <kbd>⌘⇧Space</kbd> to toggle. Click 🎤 to speak.</div>
+      <div class="hint" id="hint">Tip: <kbd>⌘⇧Space</kbd> toggles window. Turn on <b>Listen</b> to go hands-free.</div>
 
       <form id="form" class="input-row no-drag">
         <button type="button" id="mic" title="Voice">🎤</button>

@@ -3,8 +3,12 @@ const form = document.getElementById('form');
 const input = document.getElementById('input');
 const micBtn = document.getElementById('mic');
 const providerSel = document.getElementById('provider');
+const alwaysListenEl = document.getElementById('alwaysListen');
 
 const history = [];
+let isSpeaking = false;       // true while TTS is talking (mute mic)
+let isThinking = false;       // true while waiting on AI
+let alwaysListen = false;
 
 function addMsg(role, text) {
   const el = document.createElement('div');
@@ -19,12 +23,20 @@ function speak(text) {
   try {
     const u = new SpeechSynthesisUtterance(text);
     u.rate = 1.05;
+    isSpeaking = true;
+    u.onend = () => {
+      isSpeaking = false;
+      if (alwaysListen) startListening();
+    };
+    u.onerror = () => { isSpeaking = false; };
     speechSynthesis.speak(u);
-  } catch {}
+  } catch { isSpeaking = false; }
 }
 
 async function sendPrompt(prompt) {
   if (!prompt.trim()) return;
+  isThinking = true;
+  stopListening();
   addMsg('user', prompt);
   history.push({ role: 'user', content: prompt });
 
@@ -42,9 +54,12 @@ async function sendPrompt(prompt) {
     history: history.slice(0, -1),
   });
 
+  isThinking = false;
+
   if (res.error) {
     thinking.remove();
     addMsg('error', res.error);
+    if (alwaysListen) startListening();
     return;
   }
 
@@ -62,20 +77,46 @@ form.addEventListener('submit', (e) => {
 
 // --- Voice input via Web Speech API ---
 let recognition = null;
+let listening = false;
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SR) {
   recognition = new SR();
   recognition.continuous = false;
   recognition.interimResults = false;
   recognition.lang = 'en-US';
+
+  recognition.onstart = () => {
+    listening = true;
+    micBtn.classList.add('listening');
+  };
   recognition.onresult = (e) => {
     const text = e.results[0][0].transcript;
-    input.value = text;
-    sendPrompt(text);
-    input.value = '';
+    if (text && text.trim()) sendPrompt(text);
   };
-  recognition.onend = () => micBtn.classList.remove('listening');
-  recognition.onerror = () => micBtn.classList.remove('listening');
+  recognition.onend = () => {
+    listening = false;
+    micBtn.classList.remove('listening');
+    // Auto-restart for hands-free mode
+    if (alwaysListen && !isSpeaking && !isThinking) {
+      setTimeout(() => startListening(), 250);
+    }
+  };
+  recognition.onerror = (e) => {
+    listening = false;
+    micBtn.classList.remove('listening');
+    if (alwaysListen && e.error !== 'not-allowed' && !isSpeaking && !isThinking) {
+      setTimeout(() => startListening(), 800);
+    }
+  };
+}
+
+function startListening() {
+  if (!recognition || listening || isSpeaking || isThinking) return;
+  try { recognition.start(); } catch {}
+}
+function stopListening() {
+  if (!recognition || !listening) return;
+  try { recognition.stop(); } catch {}
 }
 
 micBtn.addEventListener('click', () => {
@@ -83,12 +124,14 @@ micBtn.addEventListener('click', () => {
     addMsg('error', 'Speech recognition not available in this build.');
     return;
   }
-  if (micBtn.classList.contains('listening')) {
-    recognition.stop();
-  } else {
-    micBtn.classList.add('listening');
-    recognition.start();
-  }
+  if (listening) stopListening();
+  else startListening();
+});
+
+alwaysListenEl.addEventListener('change', () => {
+  alwaysListen = alwaysListenEl.checked;
+  if (alwaysListen) startListening();
+  else stopListening();
 });
 
 addMsg('assistant', "Hey! I'm your AI cursor. Tell me where you're stuck and I'll guide you.");
